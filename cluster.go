@@ -9,6 +9,7 @@ import (
 	"github.com/jacobbrewer1/workerpool"
 	core "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/watch"
 )
 
@@ -29,7 +30,11 @@ func getTargetService() string {
 }
 
 func (a *app) watchNewPods() {
-	watcher, err := a.client.CoreV1().Pods(a.namespace).Watch(context.TODO(), metav1.ListOptions{})
+	watcher, err := a.client.CoreV1().Pods(a.namespace).Watch(context.TODO(), metav1.ListOptions{
+		LabelSelector: labels.Set{
+			labelNameAppName: a.targetService,
+		}.AsSelector().String(),
+	})
 	if err != nil {
 		slog.Error("Error watching pods", slog.String("error", err.Error()))
 		return
@@ -78,6 +83,11 @@ func (t *eventTask) Run() {
 			// No need to do anything if vault is not sealed
 			return
 		}
+
+		// Wait until the pod is in a running state
+		if pod.Status.Phase != core.PodRunning {
+			return
+		}
 	case watch.Modified:
 		// Do something
 	case watch.Deleted:
@@ -85,7 +95,7 @@ func (t *eventTask) Run() {
 	case watch.Error:
 		// Do something
 	default:
-		// Do something
+		slog.Warn("Unknown event type", slog.String("type", string(t.event.Type)))
 	}
 }
 
@@ -101,12 +111,22 @@ func (a *app) createCryptoKeySecret() error {
 		},
 	}
 
-	_, err := a.client.CoreV1().Secrets(a.namespace).Create(context.TODO(), secret, metav1.CreateOptions{})
+	_, err := a.client.CoreV1().Secrets(a.deployedNamespace).Create(context.TODO(), secret, metav1.CreateOptions{})
 	if err != nil {
 		return fmt.Errorf("error creating secret: %w", err)
 	}
 
 	return nil
+}
+
+func (a *app) getCryptoKey() (string, error) {
+	secret, err := a.client.CoreV1().Secrets(a.deployedNamespace).Get(context.TODO(), cryptoKeySecretName, metav1.GetOptions{})
+	if err != nil {
+		slog.Error("Error getting secret", slog.String("error", err.Error()))
+		return "", fmt.Errorf("error getting secret: %w", err)
+	}
+
+	return string(secret.Data[cryptoKeySecretKey]), nil
 }
 
 func getDeployedNamespace() string {
