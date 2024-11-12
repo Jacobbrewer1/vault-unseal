@@ -8,9 +8,11 @@ on:
   pull_request:
     branches:
       - main
-  release:
+  workflow_run:
+    workflows:
+      - "Create Release"
     types:
-      - published
+      - completed
 
 env:
   # Use docker.io for Docker Hub if empty
