@@ -1,7 +1,7 @@
 FROM golang:alpine as build
 WORKDIR /build
 
-COPY go.sum go.mod Makefile /build/
+COPY go.sum go.mod /build/
 
 RUN go mod download
 RUN go mod tidy
