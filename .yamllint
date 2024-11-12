@@ -3,7 +3,7 @@ extends: default
 
 ignore: |
     /.github/*
-    /helm/templates/*
+    /charts/vault-unseal/templates/*
 
 rules:
     document-start: false
