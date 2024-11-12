@@ -4,6 +4,7 @@ extends: default
 ignore: |
     /.github/*
     /charts/vault-unseal/templates/*
+    /vendor/*
 
 rules:
     document-start: false
