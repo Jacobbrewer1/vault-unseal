@@ -49,7 +49,7 @@ jobs:
         run: echo "HASH=$(git rev-parse --short ${{ github.sha }})" >> $GITHUB_ENV
 
       - name: Lowercase Image Name
-        run: echo "LOWER_IMAGE_NAME=$(echo ${{ github.IMAGE_NAME }} | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
+        run: echo "LOWER_IMAGE_NAME=$(echo ${{ github.repository }} | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
 
       - name: Build app
         run: |
