@@ -55,7 +55,7 @@ jobs:
         id: shorten_hash
         run: |
           if ${{ github.event_name == 'workflow_run' }} && ${{ github.event.workflow_run.conclusion == 'success' }}; then
-            echo "HASH=$(git rev-parse --short ${{ github.ref }})" >> $GITHUB_ENV
+            echo "HASH=$(git describe --tags --abbrev=0)" >> $GITHUB_ENV
           else
             echo "HASH=$(git describe --tags)" >> $GITHUB_ENV
           fi
