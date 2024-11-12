@@ -51,7 +51,6 @@ func (a *app) unsealVault(vc *api.Client) error {
 
 		slog.Info(
 			"Unsealing vault",
-			slog.String("key", key),
 			slog.Bool("sealed", resp.Sealed),
 			slog.String("progress", fmt.Sprintf("%d/%d", resp.Progress, resp.T)),
 		)
