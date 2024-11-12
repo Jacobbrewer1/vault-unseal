@@ -21,4 +21,6 @@ RUN mkdir -p /tmp/vault/config
 # Give the container permissions to read the /tmp/vault directory and all subdirectories
 RUN chown -R 1000:1000 /tmp/vault
 
+WORKDIR /
+
 CMD ["/usr/local/bin/vault-unseal"]
