@@ -100,10 +100,4 @@ deploymentStrategy:
     maxSurge: 25%
     maxUnavailable: 25%
 
-unsealKeys: [
-  "gSJEFuGMWB57odNNL+9RfWAG/Zflui0lbM5oUL3Rjl1B",
-  "Rd1QwcbyaH6XjtWPDq724K9PUumal/JAg7e0IK5gfj+i",
-  "Z4FYgj4TzOyTJy53ytLQA6Yg65cmCyLptgVvDXKar2p+",
-  "8BWhITviL38sNBPgOV5KSdvA93/ydxaQ1OlW2q2gFVNp",
-  "RC1FhaGT6mLvTk70+sKQsIZdDoXVx5pfOMNaxo8Z8GDP"
-]
+unsealKeys: []
