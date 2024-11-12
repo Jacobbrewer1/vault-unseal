@@ -32,7 +32,6 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@v5
         with:
-          go-version: ${{ vars.GO_VERSION }}
           cache-dependency-path: "**/*.sum"
 
       # Login against a Docker registry except on PR
@@ -59,5 +58,5 @@ jobs:
       - name: Push app
         if: ${{ github.event_name != 'pull_request' }}
         run: |
-          docker push ${{ env.LOWER_IMAGE_NAME }}:$hash
+          docker push ${{ env.LOWER_IMAGE_NAME }}:${{ env.HASH }}
           docker push ${{ env.LOWER_IMAGE_NAME }}:latest
