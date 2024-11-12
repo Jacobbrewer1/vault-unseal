@@ -152,7 +152,7 @@ func (t *eventTask) Run() {
 
 func getDeployedNamespace() string {
 	// Get the namespace that the app is running in
-	appNamespace, err := os.ReadFile("/var/run/secrets/kubernetes.io/serviceaccount/namespace")
+	appNamespace, err := os.ReadFile(defaultNamespaceFile)
 	if err != nil {
 		slog.Error("Error reading app namespace", slog.String(loggingKeyError, err.Error()))
 		return "default"

@@ -15,8 +15,8 @@ func getKubeClient() (*kubernetes.Clientset, error) {
 		return nil, fmt.Errorf("error building kubeconfig from flags: %w", err)
 	}
 
-	client := new(kubernetes.Clientset)
-	if client, err = kubernetes.NewForConfig(kubeconfig); err != nil {
+	client, err := kubernetes.NewForConfig(kubeconfig)
+	if err != nil {
 		return nil, fmt.Errorf("error creating kubernetes client: %w", err)
 	}
 

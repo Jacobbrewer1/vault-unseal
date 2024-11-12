@@ -16,8 +16,4 @@ const (
 	envKeyTargetService      = "TARGET_SERVICE"
 
 	labelNameAppName = "app.kubernetes.io/name"
-	//labelNameInstance = "app.kubernetes.io/instance"
-
-	cryptoKeySecretName = "vault-unseal-crypto-key"
-	cryptoKeySecretKey  = "crypto-key"
 )
