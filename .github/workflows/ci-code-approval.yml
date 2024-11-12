@@ -99,5 +99,5 @@ jobs:
         run: sudo apt-get install -y yamllint
 
       - name: 'Run yamllint'
-        run: yamllint -c .yamllint ./helm ./.mockery.yaml
+        run: yamllint -c .yamllint .
 
