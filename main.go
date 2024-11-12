@@ -2,10 +2,14 @@ package main
 
 import (
 	"context"
+	"errors"
 	"flag"
 	"log/slog"
+	"net/http"
 	"os"
 
+	"github.com/gorilla/mux"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/spf13/viper"
 	"k8s.io/client-go/kubernetes"
 )
@@ -39,6 +43,20 @@ func newApp(
 }
 
 func (a *app) Start() {
+	go func() {
+		r := mux.NewRouter()
+		r.HandleFunc("/metrics", promhttp.Handler().ServeHTTP)
+		srv := &http.Server{
+			Addr:    ":8080",
+			Handler: r,
+		}
+		slog.Info("Starting metrics server")
+		if err := srv.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
+			slog.Error("Error starting metrics server", slog.String(loggingKeyError, err.Error()))
+			os.Exit(1)
+		}
+	}()
+
 	a.watchNewPods()
 }
 
