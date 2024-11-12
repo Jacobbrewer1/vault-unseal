@@ -46,7 +46,8 @@ jobs:
 
       - name: Shorten hash
         id: shorten_hash
-        run: echo "HASH=$(git rev-parse --short ${{ github.sha }})" >> $GITHUB_ENV
+        run: |
+          echo "HASH=$(git rev-parse --short ${{ github.ref_name }})" >> $GITHUB_ENV
 
       - name: Lowercase Image Name
         run: echo "LOWER_IMAGE_NAME=$(echo ${{ github.repository }} | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
