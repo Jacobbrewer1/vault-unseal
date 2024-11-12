@@ -46,7 +46,7 @@ jobs:
 
       - name: Shorten hash
         id: shorten_hash
-        run: echo "HASH=$(git rev-parse --short ${{ github.sha }})" >> $GITHUB_OUTPUT
+        run: echo "HASH=$(git rev-parse --short ${{ github.sha }})" >> $GITHUB_ENV
 
       - name: Build app
         run: |
