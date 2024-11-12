@@ -5,11 +5,12 @@ on:
   push:
     branches:
       - main
-    tags:
-      - v[0-9]+.[0-9]+.[0-9]+
   pull_request:
     branches:
       - main
+  release:
+    types:
+      - published
 
 env:
   # Use docker.io for Docker Hub if empty
@@ -51,8 +52,8 @@ jobs:
       - name: Shorten hash
         id: shorten_hash
         run: |
-          if ${{ github.event_name == 'push' }} && ${{ startsWith(github.ref, 'refs/tags/') }}; then
-            echo "HASH=$(git describe --tags --abbrev=0)" >> $GITHUB_ENV
+          if ${{ github.event_name == 'release' }}; then
+            echo "HASH=$(git rev-parse --short ${{ github.ref }})"
           else
             echo "HASH=$(git describe --tags)" >> $GITHUB_ENV
           fi
