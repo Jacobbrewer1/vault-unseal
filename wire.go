@@ -9,6 +9,7 @@ func InitializeApp() (App, error) {
 	wire.Build(
 		getRootContext,
 		getKubeClient,
+		getConfig,
 		newApp,
 	)
 	return new(app), nil

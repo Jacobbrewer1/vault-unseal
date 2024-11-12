@@ -14,6 +14,10 @@ func InitializeApp() (App, error) {
 	if err != nil {
 		return nil, err
 	}
-	mainApp := newApp(context, clientset)
+	viper, err := getConfig()
+	if err != nil {
+		return nil, err
+	}
+	mainApp := newApp(context, clientset, viper)
 	return mainApp, nil
 }

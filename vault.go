@@ -42,7 +42,8 @@ func generateVaultAddress(ports []core.ContainerPort, ip string) string {
 }
 
 func (a *app) unsealVault(vc *api.Client) error {
-	for _, key := range a.unsealKeys {
+	keys := a.config.GetStringSlice("unseal_keys")
+	for _, key := range keys {
 		resp, err := vc.Sys().Unseal(key)
 		if err != nil {
 			return fmt.Errorf("error unsealing vault: %w", err)

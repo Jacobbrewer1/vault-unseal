@@ -2,10 +2,11 @@ package main
 
 import (
 	"context"
+	"flag"
 	"log/slog"
 	"os"
 
-	"github.com/jacobbrewer1/vault-unseal/encryption"
+	"github.com/spf13/viper"
 	"k8s.io/client-go/kubernetes"
 )
 
@@ -16,25 +17,24 @@ type App interface {
 type app struct {
 	ctx               context.Context
 	client            *kubernetes.Clientset
+	config            *viper.Viper
 	deployedNamespace string
 	namespace         string
 	targetService     string
-	cryptoKey         string
-	unsealKeys        []string
 }
 
 func newApp(
 	ctx context.Context,
 	client *kubernetes.Clientset,
+	config *viper.Viper,
 ) App {
 	return &app{
 		ctx:               ctx,
 		client:            client,
+		config:            config,
 		deployedNamespace: getDeployedNamespace(),
 		namespace:         getVaultNamespace(),
 		targetService:     getTargetService(),
-		cryptoKey:         encryption.GetCryptoKey(),
-		unsealKeys:        make([]string, 0),
 	}
 }
 
@@ -43,6 +43,7 @@ func (a *app) Start() {
 }
 
 func init() {
+	flag.Parse()
 	initializeLogger()
 }
 
