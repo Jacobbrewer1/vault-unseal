@@ -30,3 +30,20 @@ We recommend using the provided helm chart to install the application. The helm 
 of this repository.
 
 ## 📝 Configuration
+
+The application will take a configuration file as input. The configuration file should be in JSON format and should
+contain the following fields:
+
+```json
+{
+  "unseal_keys": [
+    "key1",
+    "key2",
+    "key3"
+  ]
+}
+```
+
+## ⚠️ Security
+
+We are bringing encryption to the configuration file in the future.
