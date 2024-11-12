@@ -76,3 +76,69 @@ jobs:
 
       - name: Test
         run: go test -v ./...
+
+  helm-lint:
+    name: 'Helm Lint'
+    runs-on: [ ubuntu-latest ]
+    steps:
+      - name: 'Checkout'
+        uses: actions/checkout@v4
+
+      # Hide any previous plan comments from the Pull Request to keep things tidy
+      - id: hide_previous_plan
+        name: Hide previous plan
+        if: github.event_name == 'pull_request'
+        uses: kanga333/comment-hider@master
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          hide_user_name: "github-actions[bot]"
+          hide_reason: "OUTDATED"
+          leave_visible: 0 # leave the last 0 comments visible
+
+      - name: 'Helm lint'
+        working-directory: helm
+        run: |
+          chmod +x helm_lint.sh
+          ./helm_lint.sh --all --report
+
+      - name: 'Get report body'
+        id: get-report-body
+        run: |
+          body="$(cat lint_report.md)"
+          body="${body//'%'/'%25'}"
+          body="${body//$'\n'/'%0A'}"
+          body="${body//$'\r'/'%0D'}" 
+          echo "::set-output name=body::$body"
+
+      - name: Did the lint fail?
+        run: |
+          if [ -f lint_report.md ] && grep -q FAIL "lint_report.md" then
+            echo "LINT_FAILED=true" >> $GITHUB_ENV
+          fi
+
+      - name: Comment PR
+        if: ${{ github.event_name == 'pull_request' && env.LINT_FAILED == 'true' }}
+        uses: thollander/actions-comment-pull-request@v3
+        with:
+          # Full file path to the plan output
+          file-path: ${{ github.workspace }}/lint_report.md
+          pr-number: ${{ github.event.pull_request.number }}
+          create-if-not-exists: true
+
+      - name: 'Check for lint failures'
+        run: |
+          if [ -f lint_report.md ] && grep -q FAIL "lint_report.md"; then exit 1; fi
+
+  yamllint:
+    name: 'Yamllint'
+    runs-on: ubuntu-latest
+    steps:
+      - name: 'Checkout'
+        uses: actions/checkout@v4
+
+      - name: Install yamllint
+        run: sudo apt-get install -y yamllint
+
+      - name: 'Run yamllint'
+        run: yamllint -c .yamllint ./helm ./.mockery.yaml
+
