@@ -48,13 +48,17 @@ jobs:
         id: shorten_hash
         run: echo "HASH=$(git rev-parse --short ${{ github.sha }})" >> $GITHUB_ENV
 
+      - name: Lowercase Repository
+        id: lowercase_repository
+        run: echo "REPOSITORY=$(echo ${{ github.repository }} | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
+
       - name: Build app
         run: |
-          docker build -t ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.HASH }} -t ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest .
+          docker build -t ${{ env.REPOSITORY }}/${{ env.IMAGE_NAME }}:${{ env.HASH }} -t ${{ env.REPOSITORY }}/${{ env.IMAGE_NAME }}:latest .
           echo "hash=$hash" >> $GITHUB_ENV
 
       - name: Push app
         if: ${{ github.event_name != 'pull_request' }}
         run: |
-          docker push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:$hash
-          docker push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
+          docker push ${{ env.REPOSITORY }}/${{ env.IMAGE_NAME }}:$hash
+          docker push ${{ env.REPOSITORY }}/${{ env.IMAGE_NAME }}:latest
