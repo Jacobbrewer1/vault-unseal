@@ -5,6 +5,8 @@ on:
   push:
     branches:
       - main
+    tags:
+      - v[0-9]+.[0-9]+.[0-9]+
   pull_request:
     branches:
       - main
@@ -29,6 +31,8 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Set up Go
         uses: actions/setup-go@v5
@@ -46,7 +50,12 @@ jobs:
 
       - name: Shorten hash
         id: shorten_hash
-        run: echo "HASH=$(git rev-parse --short ${{ github.sha }})" >> $GITHUB_ENV
+        run: |
+          if ${{ github.event_name == 'push' }} && ${{ startsWith(github.ref, 'refs/tags/') }}; then
+            echo "HASH=$(git describe --tags --abbrev=0)" >> $GITHUB_ENV
+          else
+            echo "HASH=$(git describe --tags)" >> $GITHUB_ENV
+          fi
 
       - name: Lowercase Image Name
         run: echo "LOWER_IMAGE_NAME=$(echo ${{ github.repository }} | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
