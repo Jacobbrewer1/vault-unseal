@@ -4,6 +4,7 @@ const (
 	appName = "vault-unseal"
 
 	loggingKeyAppName = "app"
+	loggingKeyError   = "err"
 
 	defaultKubeConfigLocation = "$HOME/.kube/config"
 	defaultTargetNamespace    = "vault"

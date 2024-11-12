@@ -20,6 +20,7 @@ type app struct {
 	namespace         string
 	targetService     string
 	cryptoKey         string
+	unsealKeys        []string
 }
 
 func newApp(
@@ -33,6 +34,7 @@ func newApp(
 		namespace:         getVaultNamespace(),
 		targetService:     getTargetService(),
 		cryptoKey:         encryption.GetCryptoKey(),
+		unsealKeys:        make([]string, 0),
 	}
 }
 
@@ -47,7 +49,7 @@ func init() {
 func main() {
 	a, err := InitializeApp()
 	if err != nil {
-		slog.Error("Error initializing app", slog.String("error", err.Error()))
+		slog.Error("Error initializing app", slog.String(loggingKeyError, err.Error()))
 		os.Exit(1)
 	} else if a == nil {
 		slog.Error("App is nil")
