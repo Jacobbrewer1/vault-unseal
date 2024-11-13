@@ -87,6 +87,13 @@ func (t *eventTask) Run() {
 			return
 		}
 
+		updatedPodDetails, err := t.a.client.CoreV1().Pods(t.a.namespace).Get(t.a.ctx, pod.Name, metav1.GetOptions{})
+		if err != nil {
+			l.Error("Error getting pod details", slog.String(loggingKeyError, err.Error()))
+			return
+		}
+		pod = updatedPodDetails
+
 		// If the pod is not running, re-schedule the task
 		if pod.Status.Phase != core.PodRunning {
 			l.Debug("Pod is not running, re-scheduling task")
