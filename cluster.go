@@ -89,6 +89,7 @@ func (t *eventTask) Run() {
 
 		// If the pod is not running, re-schedule the task
 		if pod.Status.Phase != core.PodRunning {
+			l.Debug("Pod is not running, re-scheduling task")
 			t.wp.MustSchedule(t)
 			return
 		}
