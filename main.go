@@ -57,7 +57,16 @@ func (a *app) Start() {
 		}
 	}()
 
-	a.watchNewPods()
+	for {
+		select {
+		case <-a.ctx.Done():
+			return
+		default:
+			a.watchNewPods()
+
+			slog.Debug("Watch new pods ended, trying to reconnect")
+		}
+	}
 }
 
 func init() {
