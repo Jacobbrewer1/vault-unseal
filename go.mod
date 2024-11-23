@@ -5,10 +5,11 @@ go 1.23
 toolchain go1.23.1
 
 require (
+	github.com/google/uuid v1.6.0
 	github.com/google/wire v0.6.0
 	github.com/gorilla/mux v1.8.1
 	github.com/hashicorp/vault/api v1.15.0
-	github.com/jacobbrewer1/workerpool v0.0.2
+	github.com/jacobbrewer1/workerpool v0.0.3
 	github.com/prometheus/client_golang v1.20.5
 	github.com/spf13/viper v1.19.0
 	k8s.io/api v0.31.2
@@ -34,7 +35,6 @@ require (
 	github.com/google/gnostic-models v0.6.8 // indirect
 	github.com/google/go-cmp v0.6.0 // indirect
 	github.com/google/gofuzz v1.2.0 // indirect
-	github.com/google/uuid v1.6.0 // indirect
 	github.com/hashicorp/errwrap v1.1.0 // indirect
 	github.com/hashicorp/go-cleanhttp v0.5.2 // indirect
 	github.com/hashicorp/go-multierror v1.1.1 // indirect
