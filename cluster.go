@@ -39,7 +39,7 @@ func (a *app) watchNewPods() {
 		return
 	}
 
-	wp := workerpool.NewWorkerPool(
+	wp := workerpool.New(
 		workerpool.WithDelayedStart(),
 	)
 
@@ -54,11 +54,11 @@ func (a *app) watchNewPods() {
 type eventTask struct {
 	id    string
 	a     *app
-	wp    *workerpool.WorkerPool
+	wp    workerpool.Pool
 	event watch.Event
 }
 
-func newEventTask(a *app, wp *workerpool.WorkerPool, event watch.Event) *eventTask {
+func newEventTask(a *app, wp workerpool.Pool, event watch.Event) *eventTask {
 	return &eventTask{
 		id:    uuid.New().String(),
 		a:     a,
