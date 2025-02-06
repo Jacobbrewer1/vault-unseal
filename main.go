@@ -7,6 +7,7 @@ import (
 	"log/slog"
 	"net/http"
 	"os"
+	"time"
 
 	"github.com/gorilla/mux"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
@@ -47,8 +48,9 @@ func (a *app) Start() {
 		r := mux.NewRouter()
 		r.HandleFunc("/metrics", promhttp.Handler().ServeHTTP)
 		srv := &http.Server{
-			Addr:    ":8080",
-			Handler: r,
+			Addr:              ":8080",
+			ReadHeaderTimeout: 10 * time.Second,
+			Handler:           r,
 		}
 		slog.Info("Starting metrics server")
 		if err := srv.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
