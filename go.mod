@@ -1,7 +1,7 @@
 module github.com/jacobbrewer1/vault-unseal
 
 go 1.23
-toolchain go1.23.1
+toolchain go1.24.1
 
 require (
 	github.com/google/uuid v1.6.0
@@ -12,7 +12,7 @@ require (
 	github.com/prometheus/client_golang v1.21.0
 	github.com/spf13/viper v1.19.0
 	k8s.io/api v0.31.3
-	k8s.io/apimachinery v0.32.2
+	k8s.io/apimachinery v0.32.3
 	k8s.io/client-go v0.31.3
 )
 
