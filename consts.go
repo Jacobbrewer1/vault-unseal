@@ -3,8 +3,17 @@ package main
 const (
 	appName = "vault-unseal"
 
-	loggingKeyAppName = "app"
-	loggingKeyError   = "err"
+	loggingKeyAppName   = "app"
+	loggingKeyError     = "err"
+	loggingKeyPod       = "pod"
+	loggingKeyAddr      = "addr"
+	loggingKeyPhase     = "phase"
+	loggingKeyTaskID    = "task_id"
+	loggingKeyEventType = "event_type"
+	loggingKeyType      = "type"
+	loggingKeySignal    = "signal"
+	loggingKeySealed    = "sealed"
+	loggingKeyProgress  = "progress"
 
 	defaultKubeConfigLocation = "$HOME/.kube/config"
 	defaultTargetNamespace    = "vault"

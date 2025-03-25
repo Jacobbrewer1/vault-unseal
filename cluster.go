@@ -69,8 +69,8 @@ func newEventTask(a *app, wp workerpool.Pool, event watch.Event) *eventTask {
 
 func (t *eventTask) Run() {
 	l := slog.With(
-		slog.String("task_id", t.id),
-		slog.String("event_type", string(t.event.Type)),
+		slog.String(loggingKeyTaskID, t.id),
+		slog.String(loggingKeyEventType, string(t.event.Type)),
 	)
 
 	pod, ok := t.event.Object.(*core.Pod)
@@ -82,7 +82,7 @@ func (t *eventTask) Run() {
 	switch t.event.Type {
 	case watch.Added, watch.Error:
 		// Is the pod still in the cluster? This is to prevent retry attempts from getting stuck
-		if pod.ObjectMeta.DeletionTimestamp != nil {
+		if pod.DeletionTimestamp != nil {
 			l.Info("Pod is being deleted, aborting")
 			return
 		}
@@ -98,8 +98,8 @@ func (t *eventTask) Run() {
 		if pod.Status.Phase != core.PodRunning {
 			l.Debug(
 				"Pod is not running, re-scheduling task",
-				slog.String("phase", string(pod.Status.Phase)),
-				slog.String("pod", pod.Name),
+				slog.String(loggingKeyPhase, string(pod.Status.Phase)),
+				slog.String(loggingKeyPod, pod.Name),
 			)
 			t.wp.MustSchedule(t)
 			return
@@ -122,19 +122,19 @@ func (t *eventTask) Run() {
 
 		l.Info(
 			"Pod is running, attempting to unseal vault",
-			slog.String("pod", pod.Name),
-			slog.String("addr", pod.Status.PodIP),
+			slog.String(loggingKeyPod, pod.Name),
+			slog.String(loggingKeyAddr, pod.Status.PodIP),
 		)
 
 		// Unseal the vault
-		if err := t.a.unsealVault(vc); err != nil {
+		if err := t.a.unsealVault(vc); err != nil { // nolint:revive // Traditional error handling
 			l.Error("Error unsealing vault", slog.String(loggingKeyError, err.Error()))
 			return
 		}
 	case watch.Modified, watch.Deleted, watch.Bookmark:
 		// Do something
 	default:
-		l.Warn("Unknown event type", slog.String("type", string(t.event.Type)))
+		l.Warn("Unknown event type", slog.String(loggingKeyType, string(t.event.Type)))
 	}
 }
 
