@@ -51,14 +51,16 @@ func (a *app) unsealVault(vc *api.Client) error {
 
 		slog.Info(
 			"Unsealing vault",
-			slog.Bool("sealed", resp.Sealed),
-			slog.String("progress", fmt.Sprintf("%d/%d", resp.Progress, resp.T)),
+			slog.Bool(loggingKeySealed, resp.Sealed),
+			slog.String(loggingKeyProgress, fmt.Sprintf("%d/%d", resp.Progress, resp.T)),
 		)
 
-		if !resp.Sealed {
-			slog.Info("Vault unsealed")
-			break
+		if resp.Sealed {
+			continue
 		}
+
+		slog.Info("Vault unsealed")
+		break
 	}
 
 	return nil
