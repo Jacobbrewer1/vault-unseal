@@ -14,9 +14,10 @@ github.com/davecgh/go-spew/spew
 ## explicit; go 1.13
 github.com/emicklei/go-restful/v3
 github.com/emicklei/go-restful/v3/log
-# github.com/fsnotify/fsnotify v1.7.0
+# github.com/fsnotify/fsnotify v1.8.0
 ## explicit; go 1.17
 github.com/fsnotify/fsnotify
+github.com/fsnotify/fsnotify/internal
 # github.com/fxamacker/cbor/v2 v2.7.0
 ## explicit; go 1.17
 github.com/fxamacker/cbor/v2
@@ -39,6 +40,10 @@ github.com/go-openapi/jsonreference/internal
 # github.com/go-openapi/swag v0.23.0
 ## explicit; go 1.20
 github.com/go-openapi/swag
+# github.com/go-viper/mapstructure/v2 v2.2.1
+## explicit; go 1.18
+github.com/go-viper/mapstructure/v2
+github.com/go-viper/mapstructure/v2/internal/errors
 # github.com/gogo/protobuf v1.3.2
 ## explicit; go 1.15
 github.com/gogo/protobuf/proto
@@ -106,7 +111,6 @@ github.com/hashicorp/go-sockaddr
 github.com/hashicorp/hcl
 github.com/hashicorp/hcl/hcl/ast
 github.com/hashicorp/hcl/hcl/parser
-github.com/hashicorp/hcl/hcl/printer
 github.com/hashicorp/hcl/hcl/scanner
 github.com/hashicorp/hcl/hcl/strconv
 github.com/hashicorp/hcl/hcl/token
@@ -137,9 +141,6 @@ github.com/klauspost/compress/internal/cpuinfo
 github.com/klauspost/compress/internal/snapref
 github.com/klauspost/compress/zstd
 github.com/klauspost/compress/zstd/internal/xxhash
-# github.com/magiconair/properties v1.8.7
-## explicit; go 1.19
-github.com/magiconair/properties
 # github.com/mailru/easyjson v0.7.7
 ## explicit; go 1.12
 github.com/mailru/easyjson/buffer
@@ -160,8 +161,8 @@ github.com/modern-go/reflect2
 # github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822
 ## explicit
 github.com/munnerz/goautoneg
-# github.com/pelletier/go-toml/v2 v2.2.2
-## explicit; go 1.16
+# github.com/pelletier/go-toml/v2 v2.2.3
+## explicit; go 1.21.0
 github.com/pelletier/go-toml/v2
 github.com/pelletier/go-toml/v2/internal/characters
 github.com/pelletier/go-toml/v2/internal/danger
@@ -193,37 +194,30 @@ github.com/prometheus/procfs/internal/util
 # github.com/ryanuber/go-glob v1.0.0
 ## explicit
 github.com/ryanuber/go-glob
-# github.com/sagikazarmark/locafero v0.4.0
-## explicit; go 1.20
+# github.com/sagikazarmark/locafero v0.7.0
+## explicit; go 1.21
 github.com/sagikazarmark/locafero
-# github.com/sagikazarmark/slog-shim v0.1.0
-## explicit; go 1.20
-github.com/sagikazarmark/slog-shim
 # github.com/sourcegraph/conc v0.3.0
 ## explicit; go 1.19
 github.com/sourcegraph/conc
 github.com/sourcegraph/conc/internal/multierror
 github.com/sourcegraph/conc/iter
 github.com/sourcegraph/conc/panics
-# github.com/spf13/afero v1.11.0
-## explicit; go 1.19
+# github.com/spf13/afero v1.12.0
+## explicit; go 1.21
 github.com/spf13/afero
 github.com/spf13/afero/internal/common
 github.com/spf13/afero/mem
-# github.com/spf13/cast v1.6.0
+# github.com/spf13/cast v1.7.1
 ## explicit; go 1.19
 github.com/spf13/cast
-# github.com/spf13/pflag v1.0.5
+# github.com/spf13/pflag v1.0.6
 ## explicit; go 1.12
 github.com/spf13/pflag
-# github.com/spf13/viper v1.19.0
-## explicit; go 1.20
+# github.com/spf13/viper v1.20.0
+## explicit; go 1.21.0
 github.com/spf13/viper
-github.com/spf13/viper/internal/encoding
 github.com/spf13/viper/internal/encoding/dotenv
-github.com/spf13/viper/internal/encoding/hcl
-github.com/spf13/viper/internal/encoding/ini
-github.com/spf13/viper/internal/encoding/javaproperties
 github.com/spf13/viper/internal/encoding/json
 github.com/spf13/viper/internal/encoding/toml
 github.com/spf13/viper/internal/encoding/yaml
@@ -251,13 +245,6 @@ go.uber.org/multierr
 # golang.org/x/crypto v0.35.0
 ## explicit; go 1.23.0
 golang.org/x/crypto/pbkdf2
-# golang.org/x/exp v0.0.0-20230905200255-921286631fa9
-## explicit; go 1.20
-golang.org/x/exp/constraints
-golang.org/x/exp/slices
-golang.org/x/exp/slog
-golang.org/x/exp/slog/internal
-golang.org/x/exp/slog/internal/buffer
 # golang.org/x/net v0.36.0
 ## explicit; go 1.23.0
 golang.org/x/net/http/httpguts
@@ -265,7 +252,7 @@ golang.org/x/net/http2
 golang.org/x/net/http2/hpack
 golang.org/x/net/idna
 golang.org/x/net/internal/httpcommon
-# golang.org/x/oauth2 v0.24.0
+# golang.org/x/oauth2 v0.25.0
 ## explicit; go 1.18
 golang.org/x/oauth2
 golang.org/x/oauth2/internal
@@ -289,7 +276,7 @@ golang.org/x/text/secure/bidirule
 golang.org/x/text/transform
 golang.org/x/text/unicode/bidi
 golang.org/x/text/unicode/norm
-# golang.org/x/time v0.7.0
+# golang.org/x/time v0.8.0
 ## explicit; go 1.18
 golang.org/x/time/rate
 # google.golang.org/protobuf v1.36.1
@@ -332,9 +319,6 @@ google.golang.org/protobuf/types/known/timestamppb
 # gopkg.in/inf.v0 v0.9.1
 ## explicit
 gopkg.in/inf.v0
-# gopkg.in/ini.v1 v1.67.0
-## explicit
-gopkg.in/ini.v1
 # gopkg.in/yaml.v3 v3.0.1
 ## explicit
 gopkg.in/yaml.v3
