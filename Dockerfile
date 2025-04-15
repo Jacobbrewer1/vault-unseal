@@ -1,12 +1,11 @@
 FROM golang:alpine as build
 WORKDIR /build
 
-COPY go.sum go.mod /build/
+COPY . /build/
 
 RUN go mod download
 RUN go mod tidy
 
-COPY . /build/
 RUN go build -o vault-unseal .
 
 FROM ubuntu:latest
