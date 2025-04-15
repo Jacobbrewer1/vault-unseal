@@ -12,6 +12,8 @@ import (
 	kubeCache "k8s.io/client-go/tools/cache"
 )
 
+// watchVaultPods watches for new pods and distributes them to the correct handler that will determine if it is a
+// Vault pod. If it is, it will attempt to unseal the vault using the unseal keys provided.
 func watchVaultPods(
 	l *slog.Logger,
 	podInformer kubeCache.SharedIndexInformer,
