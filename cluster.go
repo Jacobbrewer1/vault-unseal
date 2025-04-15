@@ -63,8 +63,14 @@ func newPodHandler(ctx context.Context, l *slog.Logger, hashBucket cache.HashBuc
 			return
 		}
 
-		if pod.Status.Phase != core.PodRunning {
-			l.Debug("Pod is not running, re-scheduling task")
+		// Is this a vault pod?
+		if pod.Labels["app"] != "vault" {
+			l.Debug("Pod is not a vault pod, ignoring")
+			return
+		}
+
+		if pod.Status.Phase != core.PodPending {
+			l.Debug("Pod is not pending, ignoring as it is likely already unsealed")
 			return
 		}
 
