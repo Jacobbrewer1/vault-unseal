@@ -12,22 +12,25 @@ import (
 	kubeCache "k8s.io/client-go/tools/cache"
 )
 
-func (a *App) watchNewPods(l *slog.Logger) web.AsyncTaskFunc {
+func watchVaultPods(
+	l *slog.Logger,
+	podInformer kubeCache.SharedIndexInformer,
+	hashBucket cache.HashBucket,
+	unsealKeys []string,
+) web.AsyncTaskFunc {
 	return func(ctx context.Context) {
-		podInformer := a.base.PodInformer()
-
 		if _, err := podInformer.AddEventHandler(kubeCache.ResourceEventHandlerFuncs{
 			AddFunc: newPodHandler(
 				ctx,
 				logging.LoggerWithComponent(l, "new-pod-handler"),
-				a.base.ServiceEndpointHashBucket(),
-				a.config.unsealKeys,
+				hashBucket,
+				unsealKeys,
 			),
 			UpdateFunc: updatePodHandler(
 				ctx,
 				logging.LoggerWithComponent(l, "update-pod-handler"),
-				a.base.ServiceEndpointHashBucket(),
-				a.config.unsealKeys,
+				hashBucket,
+				unsealKeys,
 			),
 		}); err != nil {
 			l.Error("Error adding event handler", slog.String(loggingKeyError, err.Error()))
