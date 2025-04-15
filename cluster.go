@@ -50,28 +50,25 @@ func newPodHandler(ctx context.Context, l *slog.Logger, hashBucket cache.HashBuc
 
 		pod, ok := podObj.(*core.Pod)
 		if !ok {
-			l.Warn("Object is not a pod")
 			return
 		}
 
 		if pod.GetNamespace() != targetNamespace {
-			l.Debug("Pod is not in the target namespace, ignoring")
 			return
 		}
 
 		if !hashBucket.InBucket(pod.Name) {
-			l.Debug("Pod is not in the target hash bucket, ignoring")
 			return
 		}
 
 		// Is this a vault pod?
 		if pod.Labels["app.kubernetes.io/name"] != "vault" {
-			l.Debug("Pod is not a vault pod, ignoring")
+			l.Debug("Pod is not a vault pod, ignoring", slog.String(loggingKeyPod, pod.Name))
 			return
 		}
 
 		if isSealed, _ := strconv.ParseBool(pod.Labels["vault-sealed"]); !isSealed {
-			l.Debug("Pod is not sealed, ignoring")
+			l.Debug("Pod is not sealed, ignoring", slog.String(loggingKeyPod, pod.Name))
 			return
 		}
 
