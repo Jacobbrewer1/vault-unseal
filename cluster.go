@@ -12,22 +12,27 @@ import (
 	kubeCache "k8s.io/client-go/tools/cache"
 )
 
-func (a *App) watchNewPods(l *slog.Logger) web.AsyncTaskFunc {
+// watchVaultPods watches for new pods and distributes them to the correct handler that will determine if it is a
+// Vault pod. If it is, it will attempt to unseal the vault using the unseal keys provided.
+func watchVaultPods(
+	l *slog.Logger,
+	podInformer kubeCache.SharedIndexInformer,
+	hashBucket cache.HashBucket,
+	unsealKeys []string,
+) web.AsyncTaskFunc {
 	return func(ctx context.Context) {
-		podInformer := a.base.PodInformer()
-
 		if _, err := podInformer.AddEventHandler(kubeCache.ResourceEventHandlerFuncs{
 			AddFunc: newPodHandler(
 				ctx,
 				logging.LoggerWithComponent(l, "new-pod-handler"),
-				a.base.ServiceEndpointHashBucket(),
-				a.config.unsealKeys,
+				hashBucket,
+				unsealKeys,
 			),
 			UpdateFunc: updatePodHandler(
 				ctx,
 				logging.LoggerWithComponent(l, "update-pod-handler"),
-				a.base.ServiceEndpointHashBucket(),
-				a.config.unsealKeys,
+				hashBucket,
+				unsealKeys,
 			),
 		}); err != nil {
 			l.Error("Error adding event handler", slog.String(loggingKeyError, err.Error()))
@@ -41,11 +46,11 @@ func (a *App) watchNewPods(l *slog.Logger) web.AsyncTaskFunc {
 		}
 
 		podInformer.Run(ctx.Done())
-
-		<-ctx.Done()
 	}
 }
 
+// newPodHandler is the handler for new pods. It will check if the pod is a Vault pod and if it is sealed. If it is, it
+// will attempt to unseal the vault using the unseal keys provided.
 func newPodHandler(ctx context.Context, l *slog.Logger, hashBucket cache.HashBucket, unsealKeys []string) func(any) {
 	return func(podObj any) {
 		pod, ok := podObj.(*core.Pod)
@@ -86,6 +91,8 @@ func newPodHandler(ctx context.Context, l *slog.Logger, hashBucket cache.HashBuc
 	}
 }
 
+// updatePodHandler is the handler for updated pods. It will check if the pod is a Vault pod and if it is sealed. If it
+// is, it will attempt to unseal the vault using the unseal keys provided.
 func updatePodHandler(ctx context.Context, l *slog.Logger, hashBucket cache.HashBucket, unsealKeys []string) func(any, any) {
 	return func(_, newObj any) {
 		pod, ok := newObj.(*core.Pod)
@@ -126,10 +133,12 @@ func updatePodHandler(ctx context.Context, l *slog.Logger, hashBucket cache.Hash
 	}
 }
 
+// isVaultPod checks if the pod is a Vault pod by checking the labels.
 func isVaultPod(pod *core.Pod) bool {
 	return pod.Labels["app.kubernetes.io/name"] == "vault"
 }
 
+// isVaultPodSealed checks if the pod is a Vault pod and if it is sealed by checking the labels.
 func isVaultPodSealed(pod *core.Pod) bool {
 	sealed, ok := pod.Labels["vault-sealed"]
 	if !ok {
