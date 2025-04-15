@@ -80,7 +80,7 @@ func newPodHandler(ctx context.Context, l *slog.Logger, hashBucket cache.HashBuc
 		if err := unsealNewVaultPod( // nolint:revive // Traditional error handling
 			ctx,
 			l,
-			generateVaultAddress(pod.Spec.Containers[0].Ports, pod.Status.HostIP),
+			generateVaultAddress(pod.Spec.Containers[0].Ports, pod.Status.PodIP),
 			unsealKeys,
 		); err != nil {
 			l.Error("Error unsealing vault", slog.String(loggingKeyError, err.Error()))
