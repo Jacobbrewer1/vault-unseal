@@ -46,8 +46,6 @@ func watchVaultPods(
 		}
 
 		podInformer.Run(ctx.Done())
-
-		<-ctx.Done()
 	}
 }
 
