@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"log/slog"
+	"strconv"
 
 	"github.com/google/uuid"
 	"github.com/jacobbrewer1/web"
@@ -64,13 +65,13 @@ func newPodHandler(ctx context.Context, l *slog.Logger, hashBucket cache.HashBuc
 		}
 
 		// Is this a vault pod?
-		if pod.Labels["app"] != "vault" {
+		if pod.Labels["app.kubernetes.io/name"] != "vault" {
 			l.Debug("Pod is not a vault pod, ignoring")
 			return
 		}
 
-		if pod.Status.Phase != core.PodPending {
-			l.Debug("Pod is not pending, ignoring as it is likely already unsealed")
+		if isSealed, _ := strconv.ParseBool(pod.Labels["vault-sealed"]); !isSealed {
+			l.Debug("Pod is not sealed, ignoring")
 			return
 		}
 
