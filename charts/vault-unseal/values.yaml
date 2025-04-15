@@ -69,17 +69,17 @@ livenessProbe:
   initialDelaySeconds: 10
   periodSeconds: 5
   tcpSocket:
-    port: 8080
+    port: 9090
 readinessProbe:
   initialDelaySeconds: 10
   periodSeconds: 5
   tcpSocket:
-    port: 8080
+    port: 9090
 startupProbe:
   initialDelaySeconds: 10
   periodSeconds: 5
   tcpSocket:
-    port: 8080
+    port: 9090
 
 # This section is for setting up autoscaling more information can be found here: https://kubernetes.io/docs/concepts/workloads/autoscaling/
 autoscaling:
