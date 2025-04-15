@@ -24,6 +24,12 @@ func (a *App) watchNewPods(l *slog.Logger) web.AsyncTaskFunc {
 				a.base.ServiceEndpointHashBucket(),
 				a.config.unsealKeys,
 			),
+			UpdateFunc: updatePodHandler(
+				ctx,
+				logging.LoggerWithComponent(l, "update-pod-handler"),
+				a.base.ServiceEndpointHashBucket(),
+				a.config.unsealKeys,
+			),
 		}); err != nil {
 			l.Error("Error adding event handler", slog.String(loggingKeyError, err.Error()))
 			return
@@ -61,18 +67,15 @@ func newPodHandler(ctx context.Context, l *slog.Logger, hashBucket cache.HashBuc
 			return
 		}
 
-		// Is this a vault pod?
-		if pod.Labels["app.kubernetes.io/name"] != "vault" {
-			l.Debug("Pod is not a vault pod, ignoring", slog.String(loggingKeyPod, pod.Name))
+		if !isVaultPod(pod) {
+			return
+		}
+		if !isVaultPodSealed(pod) {
+			l.Debug("Vault pod is already unsealed", slog.String(loggingKeyPod, pod.Name))
 			return
 		}
 
-		if isSealed, _ := strconv.ParseBool(pod.Labels["vault-sealed"]); !isSealed {
-			l.Debug("Pod is not sealed, ignoring", slog.String(loggingKeyPod, pod.Name))
-			return
-		}
-
-		l.Info("New pod added, attempting to unseal vault", slog.String(loggingKeyPod, pod.Name))
+		l.Info("Updated Vault pod detected, attempting to unseal vault", slog.String(loggingKeyPod, pod.Name))
 
 		if err := unsealNewVaultPod( // nolint:revive // Traditional error handling
 			ctx,
@@ -84,4 +87,64 @@ func newPodHandler(ctx context.Context, l *slog.Logger, hashBucket cache.HashBuc
 			return
 		}
 	}
+}
+
+func updatePodHandler(ctx context.Context, l *slog.Logger, hashBucket cache.HashBucket, unsealKeys []string) func(any, any) {
+	return func(_, newObj any) {
+		l = l.With(
+			slog.String(loggingKeyTaskID, uuid.New().String()),
+			slog.String(loggingKeyEventType, "pod"),
+		)
+
+		pod, ok := newObj.(*core.Pod)
+		if !ok {
+			return
+		}
+
+		if pod.GetNamespace() != targetNamespace {
+			return
+		}
+
+		if !hashBucket.InBucket(pod.Name) {
+			return
+		}
+
+		if !isVaultPod(pod) {
+			return
+		}
+		if !isVaultPodSealed(pod) {
+			l.Debug("Vault pod is already unsealed", slog.String(loggingKeyPod, pod.Name))
+			return
+		}
+
+		l.Info("New Vault pod detected, attempting to unseal vault", slog.String(loggingKeyPod, pod.Name))
+
+		if err := unsealNewVaultPod( // nolint:revive // Traditional error handling
+			ctx,
+			l,
+			generateVaultAddress(pod.Spec.Containers[0].Ports, pod.Status.HostIP),
+			unsealKeys,
+		); err != nil {
+			l.Error("Error unsealing vault", slog.String(loggingKeyError, err.Error()))
+			return
+		}
+	}
+}
+
+func isVaultPod(pod *core.Pod) bool {
+	return pod.Labels["app.kubernetes.io/name"] == "vault"
+}
+
+func isVaultPodSealed(pod *core.Pod) bool {
+	sealed, ok := pod.Labels["vault-sealed"]
+	if !ok {
+		return false
+	}
+
+	isSealed, err := strconv.ParseBool(sealed)
+	if err != nil {
+		return false
+	}
+
+	return isSealed
 }
