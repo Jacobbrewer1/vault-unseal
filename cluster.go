@@ -5,7 +5,6 @@ import (
 	"log/slog"
 	"strconv"
 
-	"github.com/google/uuid"
 	"github.com/jacobbrewer1/web"
 	"github.com/jacobbrewer1/web/cache"
 	"github.com/jacobbrewer1/web/logging"
@@ -49,15 +48,14 @@ func (a *App) watchNewPods(l *slog.Logger) web.AsyncTaskFunc {
 
 func newPodHandler(ctx context.Context, l *slog.Logger, hashBucket cache.HashBucket, unsealKeys []string) func(any) {
 	return func(podObj any) {
-		l = l.With(
-			slog.String(loggingKeyTaskID, uuid.New().String()),
-			slog.String(loggingKeyEventType, "pod"),
-		)
-
 		pod, ok := podObj.(*core.Pod)
 		if !ok {
 			return
 		}
+
+		l = l.With(
+			slog.String(loggingKeyPod, pod.Name),
+		)
 
 		if pod.GetNamespace() != targetNamespace {
 			return
@@ -91,15 +89,14 @@ func newPodHandler(ctx context.Context, l *slog.Logger, hashBucket cache.HashBuc
 
 func updatePodHandler(ctx context.Context, l *slog.Logger, hashBucket cache.HashBucket, unsealKeys []string) func(any, any) {
 	return func(_, newObj any) {
-		l = l.With(
-			slog.String(loggingKeyTaskID, uuid.New().String()),
-			slog.String(loggingKeyEventType, "pod"),
-		)
-
 		pod, ok := newObj.(*core.Pod)
 		if !ok {
 			return
 		}
+
+		l = l.With(
+			slog.String(loggingKeyPod, pod.Name),
+		)
 
 		if pod.GetNamespace() != targetNamespace {
 			return
