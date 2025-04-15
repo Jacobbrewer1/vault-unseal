@@ -69,7 +69,6 @@ func newPodHandler(ctx context.Context, l *slog.Logger, hashBucket cache.HashBuc
 			return
 		}
 		if !isVaultPodSealed(pod) {
-			l.Debug("Vault pod is already unsealed", slog.String(loggingKeyPod, pod.Name))
 			return
 		}
 
@@ -110,11 +109,10 @@ func updatePodHandler(ctx context.Context, l *slog.Logger, hashBucket cache.Hash
 			return
 		}
 		if !isVaultPodSealed(pod) {
-			l.Debug("Vault pod is already unsealed", slog.String(loggingKeyPod, pod.Name))
 			return
 		}
 
-		l.Info("New Vault pod detected, attempting to unseal vault", slog.String(loggingKeyPod, pod.Name))
+		l.Info("Updated Vault pod detected, attempting to unseal vault", slog.String(loggingKeyPod, pod.Name))
 
 		if err := unsealNewVaultPod( // nolint:revive // Traditional error handling
 			ctx,
