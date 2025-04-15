@@ -1,150 +1,83 @@
 package main
 
 import (
+	"context"
 	"log/slog"
-	"os"
 
 	"github.com/google/uuid"
-	"github.com/jacobbrewer1/workerpool"
+	"github.com/jacobbrewer1/web"
+	"github.com/jacobbrewer1/web/cache"
+	"github.com/jacobbrewer1/web/logging"
 	core "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/labels"
-	"k8s.io/apimachinery/pkg/watch"
+	kubeCache "k8s.io/client-go/tools/cache"
 )
 
-func getVaultNamespace() string {
-	vaultNamespace := os.Getenv(envKeyVaultNamespace)
-	if vaultNamespace == "" {
-		vaultNamespace = defaultTargetNamespace
-	}
-	return vaultNamespace
-}
+func (a *App) watchNewPods(l *slog.Logger) web.AsyncTaskFunc {
+	return func(ctx context.Context) {
+		podInformer := a.base.PodInformer()
 
-func getTargetService() string {
-	targetService := os.Getenv(envKeyTargetService)
-	if targetService == "" {
-		targetService = defaultTargetService
-	}
-	return targetService
-}
-
-func (a *app) watchNewPods() {
-	watcher, err := a.client.CoreV1().Pods(a.namespace).Watch(a.ctx, metav1.ListOptions{
-		LabelSelector: labels.Set{
-			labelNameAppName: a.targetService,
-		}.AsSelector().String(),
-	})
-	if err != nil {
-		slog.Error("Error watching pods", slog.String(loggingKeyError, err.Error()))
-		return
-	}
-
-	wp := workerpool.New(
-		workerpool.WithDelayedStart(),
-	)
-
-	for event := range watcher.ResultChan() {
-		wp.MustSchedule(newEventTask(a, wp, event))
-	}
-
-	slog.Debug("Watcher channel closed")
-	wp.Stop()
-}
-
-type eventTask struct {
-	id    string
-	a     *app
-	wp    workerpool.Pool
-	event watch.Event
-}
-
-func newEventTask(a *app, wp workerpool.Pool, event watch.Event) *eventTask {
-	return &eventTask{
-		id:    uuid.New().String(),
-		a:     a,
-		wp:    wp,
-		event: event,
-	}
-}
-
-func (t *eventTask) Run() {
-	l := slog.With(
-		slog.String(loggingKeyTaskID, t.id),
-		slog.String(loggingKeyEventType, string(t.event.Type)),
-	)
-
-	pod, ok := t.event.Object.(*core.Pod)
-	if !ok {
-		// Object is not a pod
-		return
-	}
-
-	switch t.event.Type {
-	case watch.Added, watch.Error:
-		// Is the pod still in the cluster? This is to prevent retry attempts from getting stuck
-		if pod.DeletionTimestamp != nil {
-			l.Info("Pod is being deleted, aborting")
+		if _, err := podInformer.AddEventHandler(kubeCache.ResourceEventHandlerFuncs{
+			AddFunc: newPodHandler(
+				ctx,
+				logging.LoggerWithComponent(l, "new-pod-handler"),
+				a.base.ServiceEndpointHashBucket(),
+				a.config.unsealKeys,
+			),
+		}); err != nil {
+			l.Error("Error adding event handler", slog.String(loggingKeyError, err.Error()))
 			return
 		}
 
-		updatedPodDetails, err := t.a.client.CoreV1().Pods(t.a.namespace).Get(t.a.ctx, pod.Name, metav1.GetOptions{})
-		if err != nil {
-			l.Error("Error getting pod details", slog.String(loggingKeyError, err.Error()))
-			return
-		}
-		pod = updatedPodDetails
-
-		// If the pod is not running, re-schedule the task
-		if pod.Status.Phase != core.PodRunning {
-			l.Debug(
-				"Pod is not running, re-scheduling task",
-				slog.String(loggingKeyPhase, string(pod.Status.Phase)),
-				slog.String(loggingKeyPod, pod.Name),
-			)
-			t.wp.MustSchedule(t)
-			return
+		if err := podInformer.SetWatchErrorHandler(func(r *kubeCache.Reflector, err error) {
+			l.Error("Error watching pods", slog.String(loggingKeyError, err.Error()))
+		}); err != nil {
+			l.Error("Error setting watch error handler", slog.String(loggingKeyError, err.Error()))
 		}
 
-		vc, err := newVaultClient(generateVaultAddress(pod.Spec.Containers[0].Ports, pod.Status.PodIP))
-		if err != nil {
-			l.Error("Error creating vault client", slog.String(loggingKeyError, err.Error()))
-			return
-		}
+		podInformer.Run(ctx.Done())
 
-		sealed, err := isVaultSealed(vc)
-		if err != nil {
-			l.Error("Error checking vault seal status", slog.String(loggingKeyError, err.Error()))
-			return
-		} else if !sealed {
-			// No need to do anything if vault is not sealed
-			return
-		}
+		<-ctx.Done()
+	}
+}
 
-		l.Info(
-			"Pod is running, attempting to unseal vault",
-			slog.String(loggingKeyPod, pod.Name),
-			slog.String(loggingKeyAddr, pod.Status.PodIP),
+func newPodHandler(ctx context.Context, l *slog.Logger, hashBucket cache.HashBucket, unsealKeys []string) func(any) {
+	return func(podObj any) {
+		l = l.With(
+			slog.String(loggingKeyTaskID, uuid.New().String()),
+			slog.String(loggingKeyEventType, "pod"),
 		)
 
-		// Unseal the vault
-		if err := t.a.unsealVault(vc); err != nil { // nolint:revive // Traditional error handling
+		pod, ok := podObj.(*core.Pod)
+		if !ok {
+			l.Warn("Object is not a pod")
+			return
+		}
+
+		if pod.GetNamespace() != targetNamespace {
+			l.Debug("Pod is not in the target namespace, ignoring")
+			return
+		}
+
+		if !hashBucket.InBucket(pod.Name) {
+			l.Debug("Pod is not in the target hash bucket, ignoring")
+			return
+		}
+
+		if pod.Status.Phase != core.PodRunning {
+			l.Debug("Pod is not running, re-scheduling task")
+			return
+		}
+
+		l.Info("New pod added, attempting to unseal vault", slog.String(loggingKeyPod, pod.Name))
+
+		if err := unsealNewVaultPod( // nolint:revive // Traditional error handling
+			ctx,
+			l,
+			generateVaultAddress(pod.Spec.Containers[0].Ports, pod.Status.HostIP),
+			unsealKeys,
+		); err != nil {
 			l.Error("Error unsealing vault", slog.String(loggingKeyError, err.Error()))
 			return
 		}
-	case watch.Modified, watch.Deleted, watch.Bookmark:
-		// Do something
-	default:
-		l.Warn("Unknown event type", slog.String(loggingKeyType, string(t.event.Type)))
 	}
-}
-
-func getDeployedNamespace() string {
-	// Get the namespace that the app is running in
-	appNamespace, err := os.ReadFile(defaultNamespaceFile)
-	if err != nil {
-		slog.Error("Error reading app namespace", slog.String(loggingKeyError, err.Error()))
-		return "default"
-	}
-
-	return string(appNamespace)
 }
