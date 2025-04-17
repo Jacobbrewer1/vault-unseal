@@ -14,24 +14,22 @@ import (
 
 // watchVaultPods watches for new pods and distributes them to the correct handler that will determine if it is a
 // Vault pod. If it is, it will attempt to unseal the vault using the unseal keys provided.
-func watchVaultPods(
+func (a *App) watchVaultPods(
 	l *slog.Logger,
-	podInformer kubeCache.SharedIndexInformer,
-	hashBucket cache.HashBucket,
 	unsealKeys []string,
 ) web.AsyncTaskFunc {
 	return func(ctx context.Context) {
-		if _, err := podInformer.AddEventHandler(kubeCache.ResourceEventHandlerFuncs{
+		if _, err := a.base.PodInformer().AddEventHandler(kubeCache.ResourceEventHandlerFuncs{
 			AddFunc: newPodHandler(
 				ctx,
 				logging.LoggerWithComponent(l, "new-pod-handler"),
-				hashBucket,
+				a.base.ServiceEndpointHashBucket(),
 				unsealKeys,
 			),
 			UpdateFunc: updatePodHandler(
 				ctx,
 				logging.LoggerWithComponent(l, "update-pod-handler"),
-				hashBucket,
+				a.base.ServiceEndpointHashBucket(),
 				unsealKeys,
 			),
 		}); err != nil {
@@ -39,13 +37,13 @@ func watchVaultPods(
 			return
 		}
 
-		if err := podInformer.SetWatchErrorHandler(func(r *kubeCache.Reflector, err error) {
+		if err := a.base.PodInformer().SetWatchErrorHandler(func(r *kubeCache.Reflector, err error) {
 			l.Error("Error watching pods", slog.String(loggingKeyError, err.Error()))
 		}); err != nil {
 			l.Error("Error setting watch error handler", slog.String(loggingKeyError, err.Error()))
 		}
 
-		podInformer.Run(ctx.Done())
+		a.base.PodInformer().Run(ctx.Done())
 	}
 }
 
