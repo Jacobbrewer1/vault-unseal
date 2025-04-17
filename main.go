@@ -79,7 +79,6 @@ func (a *App) Start() error {
 		}),
 		web.WithIndefiniteAsyncTask("unseal-vault", a.watchVaultPods(
 			logging.LoggerWithComponent(a.base.Logger(), "watch-new-pods"),
-			a.config.unsealKeys,
 		)),
 	); err != nil {
 		return fmt.Errorf("failed to start web app: %w", err)
