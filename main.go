@@ -47,6 +47,10 @@ func NewApp(l *slog.Logger) (*App, error) {
 
 func (a *App) Start() error {
 	if err := a.base.Start(
+		web.WithViperConfig(),
+		web.WithConfigWatchers(func() {
+			a.base.Shutdown() // Reboot the app if the config changes
+		}),
 		web.WithInClusterKubeClient(),
 		web.WithKubernetesPodInformer(),
 		web.WithServiceEndpointHashBucket(appName),
