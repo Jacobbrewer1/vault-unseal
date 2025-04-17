@@ -40,6 +40,7 @@ func (a *App) watchVaultPods(
 			l.Error("Error watching pods", slog.String(loggingKeyError, err.Error()))
 		}); err != nil {
 			l.Error("Error setting watch error handler", slog.String(loggingKeyError, err.Error()))
+			return
 		}
 
 		a.base.PodInformer().Run(ctx.Done())
