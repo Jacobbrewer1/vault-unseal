@@ -46,6 +46,18 @@ spec:
               containerPort: {{ .Values.service.port }}
               protocol: TCP
           env:
+            - name: "SERVICE_ACCOUNT_NAME"
+              valueFrom:
+                fieldRef:
+                  fieldPath: spec.serviceAccountName
+            - name: "POD_IP"
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.podIP
+            - name: "NODE_NAME"
+              valueFrom:
+                fieldRef:
+                  fieldPath: spec.nodeName
             - name: CONFIG_LOCATION
               value: "/tmp/config/config.json"
           livenessProbe:
