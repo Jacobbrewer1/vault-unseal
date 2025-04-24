@@ -1,6 +1,6 @@
 //go:build mage
 
-package magefiles
+package main
 
 var Aliases = map[string]interface{}{
 	"fixit": VendorDeps,

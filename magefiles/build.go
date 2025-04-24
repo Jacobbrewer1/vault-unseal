@@ -1,6 +1,6 @@
 //go:build mage
 
-package magefiles
+package main
 
 func buildWithBazel() error {
 	// BazelBaseArgs is a slice of arguments to be passed to Bazel commands.
