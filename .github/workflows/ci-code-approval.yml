@@ -90,6 +90,11 @@ jobs:
         env:
           'GOOGLE_APPLICATION_CREDENTIALS_JSON_PATH': ${{ github.workspace }}/gcp-sa-key.json
 
+      - name: cleanup
+        if: always()
+        run: |
+          rm -rf ${{ github.workspace }}/gcp-sa-key.json
+
   helm-lint:
     name: 'Helm Lint'
     runs-on: [ ubuntu-latest ]
