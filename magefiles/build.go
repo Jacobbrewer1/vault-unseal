@@ -4,6 +4,15 @@ package main
 
 import "github.com/magefile/mage/sh"
 
+type Build mg.Namespace
+
+func (b Build) All() error {
+	if err := buildWithBazel(); err != nil {
+		return err
+	}
+	return nil
+}
+
 func buildWithBazel() error {
 	// BazelBaseArgs is a slice of arguments to be passed to Bazel commands.
 	args := BazelBaseArgs()
