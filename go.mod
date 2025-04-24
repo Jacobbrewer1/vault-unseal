@@ -8,6 +8,7 @@ require (
 	github.com/caarlos0/env/v10 v10.0.0
 	github.com/hashicorp/vault/api v1.16.0
 	github.com/jacobbrewer1/web v0.0.6-0.20250422084306-f2722098b5d8
+	github.com/magefile/mage v1.15.0
 	k8s.io/api v0.32.3
 	k8s.io/client-go v0.32.3
 )

@@ -8,6 +8,7 @@ import (
 
 	"github.com/caarlos0/env/v10"
 	hashiVault "github.com/hashicorp/vault/api"
+
 	"github.com/jacobbrewer1/web"
 	"github.com/jacobbrewer1/web/logging"
 )

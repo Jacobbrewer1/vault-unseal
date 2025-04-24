@@ -63,19 +63,37 @@ jobs:
           go-version: ${{ vars.GO_VERSION }}
           cache-dependency-path: "**/*.sum"
 
-      - name: "Configure git for private modules"
+      - name: deps
+        run: go install github.com/bazelbuild/bazelisk@v1.19.0
+
+      - name: Import secrets
+        id: import-secrets
+        uses: hashicorp/vault-action@v3
+        with:
+          url: ${{ secrets.VAULT_ADDR }}
+          method: userpass
+          username: ${{ secrets.VAULT_USERNAME }}
+          password: ${{ secrets.VAULT_PASSWORD }}
+          secrets: |
+            ${{ secrets.VAULT_MOUNT }}/data/${{ secrets.VAULT_GCP_SA_NAME }} ${{ secrets.VAULT_GCP_SA_KEY }} | VAULT_GCP_SA_KEY ;
+
+      - name: Service Account File
+        id: service-account-file
+        run: |
+          echo '${{ steps.import-secrets.outputs.VAULT_GCP_SA_KEY }}' > ${{ github.workspace }}/gcp-sa-key.json
+
+      - name: Run Mage
+        uses: magefile/mage-action@v3
+        with:
+          version: latest
+          args: -v build:all
         env:
-          GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: git config --global url."https://x:${GITHUB_API_TOKEN}@github.com".insteadOf "https://github.com"
+          'GOOGLE_APPLICATION_CREDENTIALS_JSON_PATH': ${{ github.workspace }}/gcp-sa-key.json
 
-      - name: Build
-        run: go build -v ./...
-
-      - name: Verify
-        run: go vet ./...
-
-      - name: Test
-        run: go test -v ./...
+      - name: cleanup
+        if: always()
+        run: |
+          rm -rf ${{ github.workspace }}/gcp-sa-key.json
 
   helm-lint:
     name: 'Helm Lint'

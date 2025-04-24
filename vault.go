@@ -9,7 +9,7 @@ import (
 	core "k8s.io/api/core/v1"
 )
 
-func unsealNewVaultPod(ctx context.Context, l *slog.Logger, target string, keys []string) error {
+func unsealVaultPod(ctx context.Context, l *slog.Logger, target string, keys []string) error {
 	vc, err := newVaultClient(target)
 	if err != nil {
 		return fmt.Errorf("error creating vault client: %w", err)
