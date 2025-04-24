@@ -3,7 +3,6 @@
 package main
 
 import (
-	"fmt"
 	"os"
 	"strconv"
 	"strings"
@@ -62,7 +61,7 @@ var RepositoryNameOnly = sync.OnceValue(func() string {
 
 	owner := RepositoryOwner()
 	if owner == "" {
-		return ""
+		return name
 	}
 
 	name = strings.TrimPrefix(name, owner+"/")
@@ -82,10 +81,10 @@ var GCPServiceAccountJsonLocation = sync.OnceValue(func() string {
 var BazelBaseArgs = sync.OnceValue(func() []string {
 	args := make([]string, 0)
 
-	if IsGithubRunner() && RepositoryNameOnly() != "" && GCPServiceAccountJsonLocation() != "" {
-		args = append(args, fmt.Sprintf("--remote_cache=%s/%s", gcpStorageHost, RepositoryNameOnly()))
-		args = append(args, fmt.Sprintf("--google_credentials=%s", GCPServiceAccountJsonLocation()))
-	}
+	//if IsGithubRunner() && RepositoryNameOnly() != "" && GCPServiceAccountJsonLocation() != "" {
+	//	args = append(args, fmt.Sprintf("--remote_cache=%s/%s", gcpStorageHost, RepositoryNameOnly()))
+	//	args = append(args, fmt.Sprintf("--google_credentials=%s", GCPServiceAccountJsonLocation()))
+	//}
 
 	return args
 })
