@@ -1,0 +1,46 @@
+load("@aspect_bazel_lib//lib:write_source_files.bzl", "write_source_files")
+load("@bazel_gazelle//:def.bzl", "gazelle", "gazelle_binary")
+load("@io_bazel_rules_go//go:def.bzl", "go_binary", "go_library")
+
+# Extend the gazelle binary to make it capable of generating go code from protocol buffer definitions.
+gazelle_binary(
+    name = "gazelle-gen",
+    languages = [
+        "@bazel_gazelle//language/go",
+    ],
+)
+
+# gazelle:prefix github.com/jacobbrewer1/vault-unseal
+# gazelle:exclude vendor
+# gazelle:exclude magefiles
+gazelle(
+    name = "gazelle",
+    gazelle = ":gazelle-gen",
+)
+
+go_library(
+    name = "vault-unseal_lib",
+    srcs = [
+        "cluster.go",
+        "consts.go",
+        "main.go",
+        "vault.go",
+    ],
+    importpath = "github.com/jacobbrewer1/vault-unseal",
+    visibility = ["//visibility:private"],
+    deps = [
+        "@com_github_caarlos0_env_v10//:env",
+        "@com_github_hashicorp_vault_api//:api",
+        "@com_github_jacobbrewer1_web//:web",
+        "@com_github_jacobbrewer1_web//cache",
+        "@com_github_jacobbrewer1_web//logging",
+        "@io_k8s_api//core/v1:core",
+        "@io_k8s_client_go//tools/cache",
+    ],
+)
+
+go_binary(
+    name = "vault-unseal",
+    embed = [":vault-unseal_lib"],
+    visibility = ["//visibility:public"],
+)

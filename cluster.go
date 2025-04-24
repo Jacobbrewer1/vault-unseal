@@ -5,11 +5,12 @@ import (
 	"log/slog"
 	"strconv"
 
+	core "k8s.io/api/core/v1"
+	kubeCache "k8s.io/client-go/tools/cache"
+
 	"github.com/jacobbrewer1/web"
 	"github.com/jacobbrewer1/web/cache"
 	"github.com/jacobbrewer1/web/logging"
-	core "k8s.io/api/core/v1"
-	kubeCache "k8s.io/client-go/tools/cache"
 )
 
 // watchVaultPods watches for new pods and distributes them to the correct handler that will determine if it is a
@@ -77,7 +78,7 @@ func newPodHandler(ctx context.Context, l *slog.Logger, hashBucket cache.HashBuc
 
 		l.Info("Updated Vault pod detected, attempting to unseal vault", slog.String(loggingKeyPod, pod.Name))
 
-		if err := unsealNewVaultPod( // nolint:revive // Traditional error handling
+		if err := unsealVaultPod( // nolint:revive // Traditional error handling
 			ctx,
 			l,
 			generateVaultAddress(pod.Spec.Containers[0].Ports, pod.Status.PodIP),
@@ -119,7 +120,7 @@ func updatePodHandler(ctx context.Context, l *slog.Logger, hashBucket cache.Hash
 
 		l.Info("Updated Vault pod detected, attempting to unseal vault", slog.String(loggingKeyPod, pod.Name))
 
-		if err := unsealNewVaultPod( // nolint:revive // Traditional error handling
+		if err := unsealVaultPod( // nolint:revive // Traditional error handling
 			ctx,
 			l,
 			generateVaultAddress(pod.Spec.Containers[0].Ports, pod.Status.PodIP),
