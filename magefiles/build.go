@@ -2,6 +2,8 @@
 
 package main
 
+import "github.com/magefile/mage/sh"
+
 func buildWithBazel() error {
 	// BazelBaseArgs is a slice of arguments to be passed to Bazel commands.
 	args := BazelBaseArgs()
@@ -13,4 +15,5 @@ func buildWithBazel() error {
 	if err := sh.Run("bazel", args...); err != nil {
 		return err
 	}
+	return nil
 }
