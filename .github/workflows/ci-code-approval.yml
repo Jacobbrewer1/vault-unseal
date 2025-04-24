@@ -80,7 +80,7 @@ jobs:
       - name: Service Account File
         id: service-account-file
         run: |
-          echo "${{ secrets.VAULT_GCP_SA_KEY }}" > ${{ github.workspace }}/gcp-sa-key.json
+          echo ${{ secrets.VAULT_GCP_SA_KEY }} > ${{ github.workspace }}/gcp-sa-key.json
 
       - name: Run Mage
         uses: magefile/mage-action@v3
