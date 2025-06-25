@@ -9,7 +9,7 @@ require (
 	github.com/hashicorp/vault/api v1.20.0
 	github.com/jacobbrewer1/web v0.0.6
 	k8s.io/api v0.33.2
-	k8s.io/client-go v0.33.1
+	k8s.io/client-go v0.33.2
 )
 
 require (
