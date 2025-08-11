@@ -36,7 +36,7 @@ jobs:
           cache-dependency-path: "**/*.sum"
 
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: "Configure git for private modules"
         env:
@@ -55,7 +55,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Set up Go
         uses: actions/setup-go@v5
@@ -82,7 +82,7 @@ jobs:
     runs-on: [ ubuntu-latest ]
     steps:
       - name: 'Checkout'
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: 'Helm lint'
         working-directory: charts/vault-unseal
@@ -93,7 +93,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: 'Checkout'
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Install yamllint
         run: sudo apt-get install -y yamllint
